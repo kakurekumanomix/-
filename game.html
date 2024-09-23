@@ -34,15 +34,17 @@
   <!-- 支払いフォーム -->
   <h2>点数の支払い</h2>
   <form id="paymentForm">
-    <select id="payTo" required></select>
+    <select id="payTo" required>
+      <option value="">支払先を選んでください</option>
+    </select>
     <input type="number" id="payAmount" placeholder="金額を入力" required>
     <button type="submit">支払い</button>
   </form>
 
   <script src="/socket.io/socket.io.js"></script>
   <script>
-    const socket = io('/api/socket');
-    const players = JSON.parse(localStorage.getItem('players'));
+    const socket = io('/api/socket');  // サーバーのエンドポイントに接続
+    const players = JSON.parse(localStorage.getItem('players'));  // ローカルストレージからプレイヤー名を取得
     let currentPlayer = prompt("あなたの名前を選んでください", Object.values(players).join(", "));
 
     // プレイヤーのスコアを初期設定
@@ -66,9 +68,20 @@
 
     updateScoreboard();
 
+    // 支払先の選択肢を更新
+    const payToSelect = document.getElementById('payTo');
+    Object.keys(players).forEach(player => {
+      if (players[player] !== currentPlayer) {  // 自分以外のプレイヤーを選択肢に追加
+        const option = document.createElement('option');
+        option.value = player;
+        option.text = players[player];  // プレイヤー名を表示
+        payToSelect.add(option);
+      }
+    });
+
     // リンク共有ボタンの処理
     document.getElementById('shareLinkBtn').addEventListener('click', function() {
-      const sharedLink = window.location.href;
+      const sharedLink = window.location.href;  // 現在のURLをリンクとして使用
       document.getElementById('sharedLink').innerText = `リンクを共有: ${sharedLink}`;
     });
 
@@ -79,22 +92,11 @@
       const payAmount = parseInt(document.getElementById('payAmount').value);
 
       if (payTo && payAmount > 0 && playerScores[currentPlayer] >= payAmount) {
-        playerScores[currentPlayer] -= payAmount;
-        playerScores[payTo] += payAmount;
-        updateScoreboard();
+        playerScores[currentPlayer] -= payAmount;  // 支払う人の点数を減らす
+        playerScores[payTo] += payAmount;  // 受け取る人の点数を増やす
+        updateScoreboard();  // スコアを更新
       } else {
         alert("無効な支払いです。");
-      }
-    });
-
-    // 支払先の選択肢を更新
-    const payToSelect = document.getElementById('payTo');
-    Object.keys(players).forEach(player => {
-      if (players[player] !== currentPlayer) {
-        const option = document.createElement('option');
-        option.value = player;
-        option.text = players[player];
-        payToSelect.add(option);
       }
     });
   </script>
