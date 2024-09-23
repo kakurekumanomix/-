@@ -32,6 +32,15 @@
       font-size: 2rem;
       font-weight: bold;
     }
+    .actions {
+      margin-top: 30px;
+      text-align: center;
+    }
+    button, select, input {
+      margin: 10px;
+      padding: 10px;
+      font-size: 1rem;
+    }
   </style>
 </head>
 <body>
@@ -50,6 +59,22 @@
     </div>
 
     <div id="southPlayerScore" class="player"></div>
+
+    <!-- 支払いフォーム -->
+    <div class="actions">
+      <h2>点数の支払い</h2>
+      <form id="paymentForm">
+        <select id="payTo" required>
+          <option value="">支払先を選んでください</option>
+        </select>
+        <input type="number" id="payAmount" placeholder="金額を入力" required>
+        <button type="submit">支払い</button>
+      </form>
+
+      <!-- リンク共有ボタン -->
+      <button id="shareLinkBtn">リンク共有</button>
+      <p id="sharedLink"></p>
+    </div>
   </div>
 
   <!-- Socket.IOクライアントライブラリの読み込み -->
@@ -79,10 +104,59 @@
 
     updateScoreboard();
 
+    // 支払先の選択肢を更新
+    const payToSelect = document.getElementById('payTo');
+    Object.keys(players).forEach(player => {
+      if (players[player] !== currentPlayer) {  // 自分以外のプレイヤーを選択肢に追加
+        const option = document.createElement('option');
+        option.value = player;
+        option.text = players[player];  // プレイヤー名を表示
+        payToSelect.add(option);
+      }
+    });
+
+    // 支払いフォームの送信
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const payTo = document.getElementById('payTo').value;
+      const payAmount = parseInt(document.getElementById('payAmount').value);
+
+      if (payTo && payAmount > 0 && playerScores[currentPlayer] >= payAmount) {
+        playerScores[currentPlayer] -= payAmount;  // 支払う人の点数を減らす
+        playerScores[payTo] += payAmount;  // 受け取る人の点数を増やす
+        updateScoreboard();  // スコアを更新
+        // 支払いの結果をサーバーに送信
+        socket.emit('message', `${currentPlayer}が${payTo}に${payAmount}点支払いました`);
+      } else {
+        alert("無効な支払いです。");
+      }
+    });
+
     // サーバーからのメッセージを受信
     socket.on('message', (msg) => {
       console.log('サーバーからのメッセージ:', msg);
     });
+
+    // リンク共有ボタンの処理
+    document.getElementById('shareLinkBtn').addEventListener('click', function() {
+      const sharedLink = window.location.href;  // 現在のURLを取得
+      const sharedLinkParagraph = document.getElementById('sharedLink');
+
+      if (navigator.clipboard) {
+        // クリップボードにコピー
+        navigator.clipboard.writeText(sharedLink).then(() => {
+          sharedLinkParagraph.innerText = `リンクをクリップボードにコピーしました: ${sharedLink}`;
+          sharedLinkParagraph.style.color = "green";
+        }).catch(err => {
+          sharedLinkParagraph.innerText = "リンクのコピーに失敗しました。";
+          sharedLinkParagraph.style.color = "red";
+        });
+      } else {
+        sharedLinkParagraph.innerText = `このブラウザではクリップボード機能がサポートされていません。リンク: ${sharedLink}`;
+        sharedLinkParagraph.style.color = "orange";
+      }
+    });
+
   </script>
 </body>
 </html>
