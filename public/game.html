@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -42,9 +41,13 @@
     <button type="submit">支払い</button>
   </form>
 
+  <!-- Socket.IOクライアントライブラリの読み込み -->
   <script src="/socket.io/socket.io.js"></script>
+
   <script>
-    const socket = io('/api/socket');  // サーバーのエンドポイントに接続
+    // サーバーと接続
+    const socket = io('/api/socket');
+
     const players = JSON.parse(localStorage.getItem('players'));  // ローカルストレージからプレイヤー名を取得
     let currentPlayer = prompt("あなたの名前を選んでください", Object.values(players).join(", "));
 
@@ -89,14 +92,14 @@
         // 共有リンクが発行されたらクリップボードにコピー
         navigator.clipboard.writeText(sharedLink).then(() => {
           sharedLinkParagraph.innerText = `リンクをクリップボードにコピーしました: ${sharedLink}`;
-          sharedLinkParagraph.style.color = "green";  // 視認性のために緑色に変更
+          sharedLinkParagraph.style.color = "green";  // 成功したら緑色に変更
         }).catch(err => {
-          sharedLinkParagraph.innerText = "リンクのクリップボードへのコピーに失敗しました。";
-          sharedLinkParagraph.style.color = "red";  // エラーメッセージを赤色に
+          sharedLinkParagraph.innerText = "クリップボードへのコピーに失敗しました。";
+          sharedLinkParagraph.style.color = "red";  // エラーの場合は赤色に
         });
       } else {
         sharedLinkParagraph.innerText = "リンクの発行に失敗しました。";
-        sharedLinkParagraph.style.color = "red";  // エラーメッセージを赤色に
+        sharedLinkParagraph.style.color = "red";
       }
     });
 
@@ -110,10 +113,18 @@
         playerScores[currentPlayer] -= payAmount;  // 支払う人の点数を減らす
         playerScores[payTo] += payAmount;  // 受け取る人の点数を増やす
         updateScoreboard();  // スコアを更新
+        // 支払いの結果をサーバーに送信
+        socket.emit('message', `${currentPlayer}が${payTo}に${payAmount}点支払いました`);
       } else {
         alert("無効な支払いです。");
       }
     });
+
+    // サーバーからのメッセージを受信
+    socket.on('message', (msg) => {
+      console.log('サーバーからのメッセージ:', msg);
+    });
+
   </script>
 </body>
 </html>
