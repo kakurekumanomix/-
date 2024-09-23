@@ -3,8 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麻雀点数計算</title>
+    <title>麻雀卓 - プレイヤー選択</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        .chair { display: inline-block; margin: 20px; }
+        .button { margin-top: 10px; }
+    </style>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
     <script>
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        let selectedSeat = null;
+
+        function selectSeat(seat) {
+            selectedSeat = seat;
+            const buttons = document.querySelectorAll('.seat-button');
+            buttons.forEach(button => button.disabled = false);
+            document.getElementById(`button-${seat}`).disabled = true;
+        }
+
         function startGame() {
             const players = [];
             for (let i = 1; i <= 4; i++) {
@@ -13,23 +42,41 @@
                     players.push(playerName);
                 }
             }
-            if (players.length === 4) {
+            if (players.length === 4 && selectedSeat) {
                 localStorage.setItem('players', JSON.stringify(players));
+                localStorage.setItem('selectedSeat', selectedSeat);
+                database.ref('scores').set([25000, 25000, 25000, 25000]); // 初期点数をFirebaseに保存
                 window.location.href = 'score.html';
             } else {
-                alert("全てのプレイヤー名を入力してください");
+                alert("全てのプレイヤー名を入力し、自席を選択してください");
             }
         }
     </script>
 </head>
 <body>
-    <h1>席と名前を選んでください</h1>
-    <form id="seats">
-        <label>プレイヤー1: <input type="text" id="player1" placeholder="名前を入力"></label><br>
-        <label>プレイヤー2: <input type="text" id="player2" placeholder="名前を入力"></label><br>
-        <label>プレイヤー3: <input type="text" id="player3" placeholder="名前を入力"></label><br>
-        <label>プレイヤー4: <input type="text" id="player4" placeholder="名前を入力"></label><br>
-        <button type="button" onclick="startGame()">ゲームスタート</button>
-    </form>
+    <h1>麻雀卓 - プレイヤー選択</h1>
+    <div>
+        <div class="chair" onclick="selectSeat(1)">
+            <img src="chair1.png" alt="椅子1" width="100">
+            <input type="text" id="player1" placeholder="名前を入力">
+            <button class="seat-button" id="button-1" disabled>自席</button>
+        </div>
+        <div class="chair" onclick="selectSeat(2)">
+            <img src="chair2.png" alt="椅子2" width="100">
+            <input type="text" id="player2" placeholder="名前を入力">
+            <button class="seat-button" id="button-2" disabled>自席</button>
+        </div>
+        <div class="chair" onclick="selectSeat(3)">
+            <img src="chair3.png" alt="椅子3" width="100">
+            <input type="text" id="player3" placeholder="名前を入力">
+            <button class="seat-button" id="button-3" disabled>自席</button>
+        </div>
+        <div class="chair" onclick="selectSeat(4)">
+            <img src="chair4.png" alt="椅子4" width="100">
+            <input type="text" id="player4" placeholder="名前を入力">
+            <button class="seat-button" id="button-4" disabled>自席</button>
+        </div>
+    </div>
+    <button onclick="startGame()">ゲームスタート</button>
 </body>
 </html>
