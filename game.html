@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麻雀ゲーム - 点数表示</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .scoreboard { display: flex; justify-content: space-around; margin-top: 50px; }
+    .player { width: 150px; text-align: center; }
+    .center { margin-top: 50px; }
+    button, select, input { margin: 10px; padding: 10px; }
+  </style>
+</head>
+<body>
+  <h1>麻雀ゲーム - 点数表示</h1>
+  <div id="playerNameDisplay"></div>
+
+  <!-- プレイヤーのスコア表示エリア -->
+  <div class="scoreboard">
+    <div class="player" id="westPlayerScore"></div>
+    <div class="player" id="northPlayerScore"></div>
+    <div class="player" id="eastPlayerScore"></div>
+  </div>
+  <div class="center">
+    <h2 id="currentPlayerScore"></h2>
+  </div>
+  <div id="southPlayerScore" class="player"></div>
+
+  <!-- リンク共有ボタン -->
+  <button id="shareLinkBtn">リンク共有</button>
+  <p id="sharedLink"></p>
+
+  <!-- 支払いフォーム -->
+  <h2>点数の支払い</h2>
+  <form id="paymentForm">
+    <select id="payTo" required></select>
+    <input type="number" id="payAmount" placeholder="金額を入力" required>
+    <button type="submit">支払い</button>
+  </form>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const socket = io();
+    const players = JSON.parse(localStorage.getItem('players'));
+    let currentPlayer = prompt("あなたの名前を選んでください", Object.values(players).join(", "));
+
+    // プレイヤーのスコアを初期設定
+    let playerScores = {
+      north: 25000,
+      south: 25000,
+      east: 25000,
+      west: 25000
+    };
+
+    // プレイヤー名を席順に表示
+    function updateScoreboard() {
+      document.getElementById('northPlayerScore').innerText = players.north + ": " + playerScores.north;
+      document.getElementById('southPlayerScore').innerText = players.south + ": " + playerScores.south;
+      document.getElementById('eastPlayerScore').innerText = players.east + ": " + playerScores.east;
+      document.getElementById('westPlayerScore').innerText = players.west + ": " + playerScores.west;
+
+      document.getElementById('currentPlayerScore').innerText = currentPlayer + ": " + playerScores[currentPlayer];
+      document.getElementById('playerNameDisplay').innerText = "あなたは " + currentPlayer + " です";
+    }
+
+    updateScoreboard();
+
+    // リンク共有ボタンの処理
+    document.getElementById('shareLinkBtn').addEventListener('click', function() {
+      const sharedLink = window.location.href; // 現在のURLをリンクとして使用
+      document.getElementById('sharedLink').innerText = `リンクを共有: ${sharedLink}`;
+    });
+
+    // 支払いフォームの処理
+    document.getElementById('paymentForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const payTo = document.getElementById('payTo').value;
+      const payAmount = parseInt(document.getElementById('payAmount').value);
+
+      if (payTo && payAmount > 0 && playerScores[currentPlayer] >= payAmount) {
+        // 点数移動
+        playerScores[currentPlayer] -= payAmount;
+        playerScores[payTo] += payAmount;
+        updateScoreboard(); // スコアを更新
+      } else {
+        alert("無効な支払いです。");
+      }
+    });
+
+    // 支払先の選択肢を更新
+    const payToSelect = document.getElementById('payTo');
+    Object.keys(players).forEach(player => {
+      if (players[player] !== currentPlayer) {
+        const option = document.createElement('option');
+        option.value = player;
+        option.text = players[player];
+        payToSelect.add(option);
+      }
+    });
+  </script>
+</body>
+</html>
