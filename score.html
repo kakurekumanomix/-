@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>点数表示</title>
+    <style>
+        body { font-family: Arial, sans-serif; }
+        .container { display: flex; justify-content: space-around; margin-top: 50px; }
+        .score { text-align: center; }
+        #self { font-size: 2em; color: blue; }
+        .other { font-size: 1.5em; }
+        .payment { margin-top: 20px; }
+        .payment select, .payment input { margin: 10px; }
+    </style>
+    <script>
+        let scores = [25000, 25000, 25000, 25000]; // 初期点数
+
+        window.onload = function() {
+            const players = JSON.parse(localStorage.getItem('players'));
+            document.getElementById('opponent').textContent = players[0] + ": " + scores[0];
+            document.getElementById('left').textContent = players[1] + ": " + scores[1];
+            document.getElementById('self').textContent = players[2] + ": " + scores[2];
+            document.getElementById('right').textContent = players[3] + ": " + scores[3];
+            
+            // 支払い先の選択肢をセット
+            const recipientSelect = document.getElementById('recipient');
+            players.forEach((player, index) => {
+                const option = document.createElement('option');
+                option.value = index;
+                option.textContent = player;
+                recipientSelect.appendChild(option);
+            });
+        };
+
+        function pay() {
+            const players = JSON.parse(localStorage.getItem('players'));
+            const amount = parseInt(document.getElementById('amount').value);
+            const recipient = parseInt(document.getElementById('recipient').value);
+            
+            if (!isNaN(amount) && amount > 0 && recipient !== null) {
+                scores[2] -= amount;  // 自分の点数から減らす
+                scores[recipient] += amount;  // 相手の点数に加える
+                updateScores(players);
+            } else {
+                alert('正しい点数を入力してください');
+            }
+        }
+
+        function updateScores(players) {
+            document.getElementById('opponent').textContent = players[0] + ": " + scores[0];
+            document.getElementById('left').textContent = players[1] + ": " + scores[1];
+            document.getElementById('self').textContent = players[2] + ": " + scores[2];
+            document.getElementById('right').textContent = players[3] + ": " + scores[3];
+        }
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="score other" id="opponent">対面の点数</div>
+    </div>
+    <div class="container">
+        <div class="score other" id="left">左の点数</div>
+        <div class="score" id="self">自分の点数</div>
+        <div class="score other" id="right">右の点数</div>
+    </div>
+
+    <div class="payment">
+        <h2>点数を支払う</h2>
+        <label for="recipient">支払先:</label>
+        <select id="recipient"></select>
+        <label for="amount">点数:</label>
+        <input type="number" id="amount" placeholder="点数を入力">
+        <button onclick="pay()">支払う</button>
+    </div>
+</body>
+</html>
