@@ -1,82 +1,74 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>麻雀卓 - プレイヤー選択</title>
-    <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        .chair { display: inline-block; margin: 20px; }
-        .button { margin-top: 10px; }
-    </style>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
-    <script>
-        const firebaseConfig = {
-            apiKey: "YOUR_API_KEY",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
-        const app = firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-
-        let selectedSeat = null;
-
-        function selectSeat(seat) {
-            selectedSeat = seat;
-            const buttons = document.querySelectorAll('.seat-button');
-            buttons.forEach(button => button.disabled = false);
-            document.getElementById(`button-${seat}`).disabled = true;
-        }
-
-        function startGame() {
-            const players = [];
-            for (let i = 1; i <= 4; i++) {
-                const playerName = document.getElementById(`player${i}`).value;
-                if (playerName) {
-                    players.push(playerName);
-                }
-            }
-            if (players.length === 4 && selectedSeat) {
-                localStorage.setItem('players', JSON.stringify(players));
-                localStorage.setItem('selectedSeat', selectedSeat);
-                database.ref('scores').set([25000, 25000, 25000, 25000]); // 初期点数をFirebaseに保存
-                window.location.href = 'score.html';
-            } else {
-                alert("全てのプレイヤー名を入力し、自席を選択してください");
-            }
-        }
-    </script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>麻雀ゲーム - プレイヤー名登録</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; width: 300px; margin: 0 auto; }
+    .input-box { padding: 10px; }
+    .input-box label { display: block; margin-bottom: 5px; }
+    .input-box input { width: 100%; padding: 8px; }
+    button { padding: 10px 20px; margin-top: 20px; }
+  </style>
 </head>
 <body>
-    <h1>麻雀卓 - プレイヤー選択</h1>
-    <div>
-        <div class="chair" onclick="selectSeat(1)">
-            <img src="chair1.png" alt="椅子1" width="100">
-            <input type="text" id="player1" placeholder="名前を入力">
-            <button class="seat-button" id="button-1" disabled>自席</button>
-        </div>
-        <div class="chair" onclick="selectSeat(2)">
-            <img src="chair2.png" alt="椅子2" width="100">
-            <input type="text" id="player2" placeholder="名前を入力">
-            <button class="seat-button" id="button-2" disabled>自席</button>
-        </div>
-        <div class="chair" onclick="selectSeat(3)">
-            <img src="chair3.png" alt="椅子3" width="100">
-            <input type="text" id="player3" placeholder="名前を入力">
-            <button class="seat-button" id="button-3" disabled>自席</button>
-        </div>
-        <div class="chair" onclick="selectSeat(4)">
-            <img src="chair4.png" alt="椅子4" width="100">
-            <input type="text" id="player4" placeholder="名前を入力">
-            <button class="seat-button" id="button-4" disabled>自席</button>
-        </div>
+  <h1>麻雀ゲーム - プレイヤー名登録</h1>
+
+  <!-- プレイヤー名の入力欄を麻雀の席順に配置 -->
+  <div class="grid">
+    <div></div>
+    <div class="input-box">
+      <label for="northPlayer">① 北</label>
+      <input type="text" id="northPlayer" placeholder="北のプレイヤー名" required>
     </div>
-    <button onclick="startGame()">ゲームスタート</button>
+    <div></div>
+
+    <div class="input-box">
+      <label for="westPlayer">② 西</label>
+      <input type="text" id="westPlayer" placeholder="西のプレイヤー名" required>
+    </div>
+    <div></div>
+    <div class="input-box">
+      <label for="eastPlayer">③ 東</label>
+      <input type="text" id="eastPlayer" placeholder="東のプレイヤー名" required>
+    </div>
+
+    <div></div>
+    <div class="input-box">
+      <label for="southPlayer">④ 南 (ホスト)</label>
+      <input type="text" id="southPlayer" placeholder="ホストの名前" required>
+    </div>
+    <div></div>
+  </div>
+
+  <button id="startGameBtn" disabled>ゲームスタート</button>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script>
+    const startGameBtn = document.getElementById('startGameBtn');
+    const inputs = document.querySelectorAll('input');
+
+    // 全ての入力欄に値が入ったらボタンを有効化
+    inputs.forEach(input => {
+      input.addEventListener('input', () => {
+        const allFilled = Array.from(inputs).every(i => i.value.trim() !== "");
+        startGameBtn.disabled = !allFilled;
+      });
+    });
+
+    // 「ゲームスタート」ボタンを押したら次の画面に進む
+    startGameBtn.addEventListener('click', () => {
+      const players = {
+        north: document.getElementById('northPlayer').value,
+        south: document.getElementById('southPlayer').value,
+        east: document.getElementById('eastPlayer').value,
+        west: document.getElementById('westPlayer').value
+      };
+      localStorage.setItem('players', JSON.stringify(players));
+      window.location.href = "game.html";
+    });
+  </script>
 </body>
 </html>
