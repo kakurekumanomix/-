@@ -5,26 +5,52 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>麻雀ゲーム - 点数表示</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    .scoreboard { display: flex; justify-content: space-around; margin-top: 50px; }
-    .player { width: 150px; text-align: center; }
-    .center { margin-top: 50px; }
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .scoreboard { 
+      display: flex; 
+      justify-content: space-around; 
+      margin-top: 50px; 
+    }
+    .player { 
+      width: 150px; 
+      text-align: center; 
+    }
+    .center { 
+      margin-top: 50px; 
+    }
+    .score {
+      font-size: 2rem;
+      font-weight: bold;
+    }
   </style>
 </head>
 <body>
-  <h1>麻雀ゲーム - 点数表示</h1>
-  <div id="playerNameDisplay"></div>
+  <div class="container">
+    <h1>麻雀ゲーム - 点数表示</h1>
+    <div id="playerNameDisplay" class="score"></div>
 
-  <!-- プレイヤーのスコア表示エリア -->
-  <div class="scoreboard">
-    <div class="player" id="westPlayerScore"></div>
-    <div class="player" id="northPlayerScore"></div>
-    <div class="player" id="eastPlayerScore"></div>
+    <div class="scoreboard">
+      <div class="player" id="westPlayerScore"></div>
+      <div class="player" id="northPlayerScore"></div>
+      <div class="player" id="eastPlayerScore"></div>
+    </div>
+
+    <div class="center">
+      <h2 id="currentPlayerScore" class="score"></h2>
+    </div>
+
+    <div id="southPlayerScore" class="player"></div>
   </div>
-  <div class="center">
-    <h2 id="currentPlayerScore"></h2>
-  </div>
-  <div id="southPlayerScore" class="player"></div>
 
   <!-- Socket.IOクライアントライブラリの読み込み -->
   <script src="/socket.io/socket.io.js"></script>
