@@ -5,41 +5,72 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>麻雀ゲーム - プレイヤー名登録</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; }
-    .grid { display: grid; grid-template-columns: 1fr 1fr 1fr; grid-template-rows: 1fr 1fr 1fr; width: 300px; margin: 0 auto; }
-    .input-box { padding: 10px; }
-    button { padding: 10px 20px; margin-top: 20px; }
+    body { 
+      font-family: Arial, sans-serif; 
+      text-align: center; 
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 600px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    .grid { 
+      display: grid; 
+      grid-template-columns: 1fr 1fr 1fr; 
+      grid-template-rows: auto; 
+      gap: 20px; 
+      justify-content: center;
+    }
+    .input-box { 
+      padding: 10px; 
+      text-align: center;
+    }
+    input {
+      width: 100%;
+      padding: 8px;
+      font-size: 1rem;
+      margin-top: 5px;
+    }
+    button { 
+      padding: 10px 20px; 
+      font-size: 1.2rem;
+      margin-top: 20px; 
+      cursor: pointer;
+    }
   </style>
 </head>
 <body>
-  <h1>麻雀ゲーム - プレイヤー名登録</h1>
-  <div class="grid">
-    <div></div>
-    <div class="input-box">
-      <label for="northPlayer">① 北</label>
-      <input type="text" id="northPlayer" placeholder="北のプレイヤー名">
-    </div>
-    <div></div>
+  <div class="container">
+    <h1>麻雀ゲーム - プレイヤー名登録</h1>
+    <div class="grid">
+      <div></div>
+      <div class="input-box">
+        <label for="northPlayer">① 北</label>
+        <input type="text" id="northPlayer" placeholder="北のプレイヤー名">
+      </div>
+      <div></div>
 
-    <div class="input-box">
-      <label for="westPlayer">② 西</label>
-      <input type="text" id="westPlayer" placeholder="西のプレイヤー名">
-    </div>
-    <div></div>
-    <div class="input-box">
-      <label for="eastPlayer">③ 東</label>
-      <input type="text" id="eastPlayer" placeholder="東のプレイヤー名">
-    </div>
+      <div class="input-box">
+        <label for="westPlayer">② 西</label>
+        <input type="text" id="westPlayer" placeholder="西のプレイヤー名">
+      </div>
+      <div></div>
+      <div class="input-box">
+        <label for="eastPlayer">③ 東</label>
+        <input type="text" id="eastPlayer" placeholder="東のプレイヤー名">
+      </div>
 
-    <div></div>
-    <div class="input-box">
-      <label for="southPlayer">④ 南（ホスト）</label>
-      <input type="text" id="southPlayer" placeholder="ホストの名前">
+      <div></div>
+      <div class="input-box">
+        <label for="southPlayer">④ 南（ホスト）</label>
+        <input type="text" id="southPlayer" placeholder="ホストの名前">
+      </div>
+      <div></div>
     </div>
-    <div></div>
+    <button id="startGameBtn" disabled>ゲームスタート</button>
   </div>
-
-  <button id="startGameBtn" disabled>ゲームスタート</button>
 
   <script>
     const inputs = document.querySelectorAll('input');
